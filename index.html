@@ -175,11 +175,12 @@ td.edit{color:rgb(var(--color-accent-primary))}
 .dists{display:grid;gap:2rem;margin-top:2.5rem}
 @media(min-width:900px){.dists{grid-template-columns:1fr 1fr}}
 .dist h4{font-family:'JetBrains Mono',monospace;font-weight:400;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:rgb(var(--color-text-secondary));margin-bottom:.9rem}
-.drow{display:grid;grid-template-columns:11rem 1fr 3.2rem;align-items:center;gap:.75rem;font-size:.88rem;padding:.35rem 0}
-.drow .track{height:8px;border-radius:999px;background:rgb(var(--color-border)/.07);overflow:hidden}
-.drow .fill{height:100%;border-radius:999px;background:rgb(var(--color-text-primary)/.75);width:0;transition:width 1.1s cubic-bezier(.22,1,.36,1)}
+.drow{display:grid;grid-template-columns:15.5rem 1fr 3.2rem;align-items:center;gap:.75rem;font-size:.88rem;padding:.35rem 0}
+.drow .track{display:block;height:8px;border-radius:999px;background:rgb(var(--color-border)/.07);overflow:hidden}
+.drow .fill{display:block;height:100%;border-radius:999px;background:rgb(var(--color-text-primary)/.75);width:0;transition:width 1.1s cubic-bezier(.22,1,.36,1)}
 .drow .v{font-family:'JetBrains Mono',monospace;font-size:.8rem;text-align:right;color:rgb(var(--color-text-secondary))}
-@media(max-width:520px){.drow{grid-template-columns:7.5rem 1fr 2.8rem;font-size:.8rem}}
+@media(max-width:900px){.drow{grid-template-columns:minmax(0,11rem) 1fr 3rem}}
+@media(max-width:520px){.drow{grid-template-columns:8.5rem 1fr 2.8rem;font-size:.8rem}}
 
 /* bibtex */
 .bib{position:relative;margin-top:2rem}
@@ -477,7 +478,7 @@ rows.forEach(r=>{
 const dists={
   'd-genre':[['Landscape & atmosphere',27],['Figurative & portraiture',24],['Narrative & religious',22.5],['Still life & objects',13.5],['Modernism & abstract',13]],
   'd-medium':[['Oil on canvas / panel',45],['Ink & wash',29],['Tempera, gouache, encaustic',14.5],['Watercolor & mixed',11.5]],
-  'd-trad':[['European classical & Baroque',32],['East Asian literati & ukiyo-e',28.5],['Impressionism & post-',24],['Persian & South Asian',8.5],['Modernism & regional',7]],
+  'd-trad':[['European classical & Baroque',32],['East Asian literati & ukiyo‑e',28.5],['(Post‑)Impressionism',24],['Persian & South Asian',8.5],['Modernism & regional',7]],
   'd-epoch':[['19th century',42.5],['Renaissance & Baroque',26.5],['20th-century modernism',23.5],['Ancient & medieval',7.5]],
 };
 for(const [id,items] of Object.entries(dists)){
