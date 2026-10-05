@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Painting2Code</title>
+<meta name="description" content="Painting2Code evaluates whether multimodal coding agents can rebuild museum masterpieces as executable, editable programs, not just pictures that look right." />
+<link rel="icon" href="assets/evolvent-logo.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<script>
+(function(){try{var s=localStorage.getItem('theme');
+var d=window.matchMedia('(prefers-color-scheme: dark)').matches;
+if(s==='dark'||(s===null&&d)){document.documentElement.classList.add('dark')}}catch(e){}})();
+</script>
+<style>
+:root{
+  --color-bg-deep:255 255 255; --color-bg-surface:245 245 245;
+  --color-accent-primary:7 14 176; --color-accent-secondary:44 52 204; --color-accent-tertiary:17 17 17;
+  --color-text-primary:10 10 10; --color-text-secondary:85 85 85; --color-border:0 0 0;
+  --nav-bg:rgb(255 255 255 / .9);
+  --pass:22 128 92; --fail:196 54 54;
+}
+.dark{
+  --color-bg-deep:0 0 0; --color-bg-surface:17 17 17;
+  --color-accent-primary:76 84 236; --color-accent-secondary:124 132 246; --color-accent-tertiary:255 255 255;
+  --color-text-primary:250 250 250; --color-text-secondary:136 136 136; --color-border:255 255 255;
+  --nav-bg:rgb(0 0 0 / .85);
+  --pass:74 196 150; --fail:240 110 110;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:rgb(var(--color-bg-deep));color:rgb(var(--color-text-primary));font-family:'Inter',system-ui,sans-serif;line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+a[href],button:not(:disabled),[role=button],label[for],summary{cursor:pointer}
+em{font-family:serif;font-style:italic;font-weight:400}
+img{display:block;max-width:100%}
+.mono{font-family:'JetBrains Mono',monospace}
+.display{font-family:'Space Grotesk',system-ui,sans-serif}
+.muted{color:rgb(var(--color-text-secondary))}
+.wrap{max-width:72rem;margin:0 auto;padding:0 1.5rem}
+.section{padding:4rem 0;border-top:1px solid rgb(var(--color-border)/.08)}
+@media(min-width:768px){.wrap{padding:0 3rem}.section{padding:6rem 0}}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:rgb(var(--color-accent-primary))}
+h2{font-family:'Space Grotesk',sans-serif;font-weight:300;font-size:clamp(1.9rem,4vw,3rem);line-height:1.1;letter-spacing:-.02em;margin-top:.9rem;max-width:44rem}
+.lead{margin-top:1.25rem;max-width:42rem;font-size:1.0625rem;color:rgb(var(--color-text-secondary))}
+
+/* nav */
+nav{position:fixed;inset:0 0 auto 0;z-index:50;background:var(--nav-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgb(var(--color-border)/.08)}
+nav .row{display:flex;align-items:center;justify-content:space-between;padding:.6rem 1.5rem}
+.logo{display:inline-flex;color:rgb(var(--color-text-primary))}
+.logo svg{height:26px;width:auto}
+.navlinks{display:none;align-items:center;gap:1.5rem}
+.navlinks ul{display:flex;gap:2rem;list-style:none}
+.navlinks a{font-size:.95rem;letter-spacing:.04em;color:rgb(var(--color-text-secondary));transition:color .2s}
+.navlinks a:hover{color:rgb(var(--color-text-primary))}
+.vr{width:1px;height:1rem;background:rgb(var(--color-border)/.18)}
+@media(min-width:860px){.navlinks{display:flex}}
+.icon-btn{display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;border:0;background:transparent;color:rgb(var(--color-text-secondary));border-radius:.375rem;transition:color .2s}
+.icon-btn:hover{color:rgb(var(--color-text-primary))}
+.icon-btn svg{width:16px;height:16px}
+.sun{display:none}.dark .sun{display:block}.dark .moon{display:none}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:.5rem;border-radius:.375rem;font-weight:500;letter-spacing:.02em;font-size:.875rem;padding:.65rem 1.25rem;transition:all .2s ease-out;border:1px solid transparent}
+.btn-primary{background:rgb(var(--color-text-primary));color:rgb(var(--color-bg-deep));box-shadow:0 1px 0 0 rgba(255,255,255,.08) inset,0 1px 2px 0 rgba(0,0,0,.12)}
+.btn-primary:hover{box-shadow:0 0 16px rgba(76,84,236,.4),0 1px 2px 0 rgba(0,0,0,.12);transform:translateY(-2px)}
+.btn-ghost{border-color:rgb(var(--color-border)/.2);color:rgb(var(--color-text-primary))}
+.btn-ghost:hover{background:rgb(var(--color-text-primary)/.06);border-color:rgb(var(--color-border)/.4)}
+.btn svg{width:14px;height:14px}
+.is-off{cursor:default;color:rgb(var(--color-text-secondary))}.is-off:hover{background:transparent;border-color:rgb(var(--color-border)/.2)}
+.soon{font-family:'JetBrains Mono',monospace;font-size:.65rem;padding:.1rem .45rem;border-radius:999px;border:1px solid rgb(var(--color-accent-primary)/.4);color:rgb(var(--color-accent-primary))}
+
+/* hero */
+.hero{min-height:100svh;display:flex;align-items:center;justify-content:center;padding:7rem 1.5rem 3rem;position:relative}
+.hero::before{content:'';position:absolute;inset:0;z-index:-1;background-image:linear-gradient(rgb(var(--color-border)/.035) 1px,transparent 1px),linear-gradient(90deg,rgb(var(--color-border)/.035) 1px,transparent 1px);background-size:60px 60px;-webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 40%,#000 0%,transparent 75%);mask-image:radial-gradient(ellipse 70% 60% at 50% 40%,#000 0%,transparent 75%)}
+.hero-inner{max-width:52rem;text-align:center;margin:0 auto}
+.hero h1{font-family:'Space Grotesk',sans-serif;font-weight:300;font-size:clamp(2.6rem,6.4vw,4.75rem);line-height:1.05;letter-spacing:-.03em;margin-top:1.4rem}
+.hero .sub{margin:1.8rem auto 0;max-width:40rem;font-size:clamp(1rem,1.6vw,1.15rem);color:rgb(var(--color-text-secondary))}
+.hero .sub u{text-decoration:underline;text-decoration-color:rgb(var(--color-accent-primary)/.7);text-decoration-thickness:1.5px;text-underline-offset:5px;color:rgb(var(--color-text-primary))}
+.cta{display:flex;flex-wrap:wrap;gap:.75rem;justify-content:center;margin-top:2.4rem}
+.fine{margin-top:3rem;font-size:.8rem;letter-spacing:.06em;color:rgb(var(--color-text-secondary)/.85)}
+.fine b{font-weight:500;color:rgb(var(--color-text-primary))}
+
+/* gallery */
+.gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-top:3.5rem}
+@media(min-width:768px){.gallery{grid-template-columns:repeat(6,1fr)}}
+.gallery figure{position:relative;border-radius:1rem;overflow:hidden;aspect-ratio:3/4;background:rgb(var(--color-bg-surface));border:1px solid rgb(var(--color-border)/.1)}
+.gallery img{width:100%;height:100%;object-fit:cover;transition:transform .8s cubic-bezier(.22,1,.36,1)}
+.gallery figure:hover img{transform:scale(1.05)}
+.gallery figcaption{position:absolute;inset:auto 0 0 0;padding:2rem .75rem .65rem;background:linear-gradient(to top,rgba(0,0,0,.78),transparent);color:#fff;font-size:.72rem;line-height:1.35;opacity:0;transform:translateY(6px);transition:all .35s ease-out;text-align:left}
+.gallery figcaption .mono{display:block;font-size:.62rem;opacity:.75;margin-top:.15rem}
+.gallery figure:hover figcaption,.gallery figure:focus-within figcaption{opacity:1;transform:none}
+@media(hover:none){.gallery figcaption{opacity:1;transform:none}}
+
+/* stat contrast */
+.versus{display:grid;gap:1rem;margin-top:3rem}
+@media(min-width:768px){.versus{grid-template-columns:1fr auto 1fr;align-items:stretch}}
+.vcard{border:1px solid rgb(var(--color-border)/.12);border-radius:1rem;padding:2rem;background:rgb(var(--color-bg-surface)/.6)}
+.vcard .k{font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:rgb(var(--color-text-secondary))}
+.vcard .n{font-family:'JetBrains Mono',monospace;font-weight:500;font-size:clamp(3.2rem,8vw,5.5rem);line-height:1;margin-top:1rem;letter-spacing:-.04em}
+.vcard p{margin-top:1rem;color:rgb(var(--color-text-secondary));font-size:.95rem}
+.vcard.hl{border-color:rgb(var(--color-accent-primary)/.35);box-shadow:0 0 60px rgba(76,84,236,.12)}
+.vcard.hl .n{color:rgb(var(--color-accent-primary))}
+.arrow{display:flex;align-items:center;justify-content:center;color:rgb(var(--color-text-secondary));font-family:'JetBrains Mono',monospace;font-size:.8rem;letter-spacing:.1em}
+
+/* steps */
+.steps{display:grid;gap:1.25rem;margin-top:3rem}
+@media(min-width:900px){.steps{grid-template-columns:repeat(3,1fr)}}
+.card{border:1px solid rgb(var(--color-border)/.12);border-radius:1rem;padding:1.75rem;background:rgb(var(--color-bg-surface)/.6);transition:all .3s}
+.card:hover{transform:translateY(-4px);border-color:rgb(var(--color-accent-primary)/.3);box-shadow:0 10px 30px -10px rgb(var(--color-accent-primary)/.18)}
+.card .num{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:rgb(var(--color-text-secondary))}
+.card h3{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1.35rem;letter-spacing:-.01em;margin-top:.9rem}
+.card p{margin-top:.6rem;color:rgb(var(--color-text-secondary));font-size:.93rem}
+.tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:1rem}
+.tag{font-size:.72rem;padding:.2rem .65rem;border-radius:999px;background:rgb(var(--color-text-primary)/.06);color:rgb(var(--color-text-primary))}
+.sandbox{margin-top:1.25rem;display:flex;flex-wrap:wrap;align-items:center;gap:.6rem 1rem;border:1px dashed rgb(var(--color-border)/.18);border-radius:1rem;padding:1.1rem 1.4rem;font-size:.9rem;color:rgb(var(--color-text-secondary))}
+.sandbox b{color:rgb(var(--color-text-primary));font-weight:500}
+
+/* probe demo */
+.demo{margin-top:3rem;border:1px solid rgb(var(--color-border)/.12);border-radius:1rem;overflow:hidden}
+.demo-head{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid rgb(var(--color-border)/.08);background:rgb(var(--color-bg-surface)/.6)}
+.seg{display:inline-flex;border:1px solid rgb(var(--color-border)/.15);border-radius:.5rem;padding:3px}
+.seg button{border:0;background:transparent;color:rgb(var(--color-text-secondary));font:500 .82rem 'Inter',sans-serif;padding:.4rem .8rem;border-radius:.35rem}
+.seg button[aria-pressed=true]{background:rgb(var(--color-text-primary));color:rgb(var(--color-bg-deep))}
+.demo-body{display:grid;grid-template-columns:minmax(0,1fr);gap:1.25rem;padding:1.25rem}
+.demo-body .pane{min-width:0}
+@media(min-width:560px) and (max-width:899px){.demo-body{grid-template-columns:repeat(3,minmax(0,1fr))}.demo-body .pane:first-child{grid-column:1/-1}}
+@media(min-width:900px){.demo-body{grid-template-columns:minmax(0,1.05fr) repeat(3,minmax(0,1fr));align-items:start}}
+.pane .lbl{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:rgb(var(--color-text-secondary));margin-bottom:.5rem}
+.pane canvas{width:100%;height:auto;border-radius:.6rem;border:1px solid rgb(var(--color-border)/.1);display:block}
+pre.code{font-family:'JetBrains Mono',monospace;font-size:.72rem;line-height:1.55;background:rgb(var(--color-bg-surface));border:1px solid rgb(var(--color-border)/.1);border-radius:.6rem;padding:.85rem;overflow:auto;white-space:pre;min-height:12.5rem}
+pre.code .hl{background:rgb(var(--color-accent-primary)/.14);color:rgb(var(--color-accent-primary));border-radius:3px;padding:0 2px}
+pre.code .c{color:rgb(var(--color-text-secondary))}
+.verdict{display:flex;flex-wrap:wrap;gap:.6rem 1.5rem;align-items:center;padding:1rem 1.25rem;border-top:1px solid rgb(var(--color-border)/.08);font-size:.9rem}
+.pill{display:inline-flex;align-items:center;gap:.45rem;font-family:'JetBrains Mono',monospace;font-size:.75rem;padding:.25rem .7rem;border-radius:999px;border:1px solid currentColor}
+.pill.pass{color:rgb(var(--pass))}.pill.fail{color:rgb(var(--fail))}
+.pill i{width:.45rem;height:.45rem;border-radius:999px;background:currentColor}
+.demo-note{padding:0 1.25rem 1rem;font-size:.78rem;color:rgb(var(--color-text-secondary))}
+
+/* results */
+.tbl-wrap{margin-top:3rem;border:1px solid rgb(var(--color-border)/.12);border-radius:1rem;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.9rem;min-width:640px}
+th,td{padding:.8rem 1rem;text-align:right;border-bottom:1px solid rgb(var(--color-border)/.07);white-space:nowrap}
+th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
+thead th{font-family:'JetBrains Mono',monospace;font-weight:400;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:rgb(var(--color-text-secondary));background:rgb(var(--color-bg-surface)/.6)}
+td{font-family:'JetBrains Mono',monospace}
+td:nth-child(2){font-family:'Inter',sans-serif;color:rgb(var(--color-text-secondary))}
+tbody tr:last-child td{border-bottom:0}
+tr.grp td{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:rgb(var(--color-text-secondary));background:rgb(var(--color-bg-surface)/.35);text-align:left}
+td b{font-weight:600}
+td.edit{color:rgb(var(--color-accent-primary))}
+.cell{position:relative}
+.bar{display:inline-block;height:6px;border-radius:999px;background:rgb(var(--color-text-primary)/.18);margin-right:.6rem;vertical-align:middle}
+.findings{display:grid;gap:1.25rem;margin-top:1.25rem}
+@media(min-width:900px){.findings{grid-template-columns:repeat(3,1fr)}}
+.finding .big{font-family:'JetBrains Mono',monospace;font-weight:500;font-size:2.4rem;letter-spacing:-.03em;margin-top:.75rem;line-height:1}
+.finding .big small{font-size:1rem;color:rgb(var(--color-text-secondary));font-weight:400;letter-spacing:0}
+.fig{margin-top:2.5rem}
+.fig img{width:100%;border-radius:1rem;border:1px solid rgb(var(--color-border)/.1);background:#fff}
+.fig figcaption{margin-top:.8rem;font-size:.85rem;color:rgb(var(--color-text-secondary));max-width:52rem}
+
+/* dataset */
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;margin-top:3rem;background:rgb(var(--color-border)/.1);border:1px solid rgb(var(--color-border)/.1);border-radius:1rem;overflow:hidden}
+@media(min-width:768px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{background:rgb(var(--color-bg-deep));padding:1.75rem 1.5rem}
+.stat .n{font-family:'JetBrains Mono',monospace;font-weight:500;font-size:clamp(2rem,4vw,2.8rem);letter-spacing:-.03em;line-height:1}
+.stat .k{margin-top:.6rem;font-size:.85rem;color:rgb(var(--color-text-secondary))}
+.dists{display:grid;gap:2rem;margin-top:2.5rem}
+@media(min-width:900px){.dists{grid-template-columns:1fr 1fr}}
+.dist h4{font-family:'JetBrains Mono',monospace;font-weight:400;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:rgb(var(--color-text-secondary));margin-bottom:.9rem}
+.drow{display:grid;grid-template-columns:11rem 1fr 3.2rem;align-items:center;gap:.75rem;font-size:.88rem;padding:.35rem 0}
+.drow .track{height:8px;border-radius:999px;background:rgb(var(--color-border)/.07);overflow:hidden}
+.drow .fill{height:100%;border-radius:999px;background:rgb(var(--color-text-primary)/.75);width:0;transition:width 1.1s cubic-bezier(.22,1,.36,1)}
+.drow .v{font-family:'JetBrains Mono',monospace;font-size:.8rem;text-align:right;color:rgb(var(--color-text-secondary))}
+@media(max-width:520px){.drow{grid-template-columns:7.5rem 1fr 2.8rem;font-size:.8rem}}
+
+/* bibtex */
+.bib{position:relative;margin-top:2rem}
+.bib pre{font-family:'JetBrains Mono',monospace;font-size:.8rem;line-height:1.65;background:rgb(var(--color-bg-surface));border:1px solid rgb(var(--color-border)/.1);border-radius:1rem;padding:1.5rem;overflow:auto}
+.bib .btn{position:absolute;top:.85rem;right:.85rem;padding:.4rem .8rem;font-size:.78rem}
+
+footer{border-top:1px solid rgb(var(--color-border)/.12);padding:2rem 1.5rem}
+footer .row{max-width:72rem;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:1rem;font-size:.78rem;color:rgb(var(--color-text-secondary))}
+footer .links{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;justify-content:center}
+footer .links a:hover{color:rgb(var(--color-text-primary))}
+footer .credits{max-width:46rem;text-align:center;line-height:1.6}
+
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .9s cubic-bezier(.22,1,.36,1),transform .9s cubic-bezier(.22,1,.36,1)}
+.reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<nav aria-label="Primary">
+  <div class="row">
+    <a class="logo" href="#top" aria-label="Painting2Code, back to top"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 55.530 347.114 59.019" fill="currentColor" role="img" aria-label="Evolvent AI"><g transform="translate(-20.7659,41.4174) scale(0.51297)"><path transform="matrix(1,0,0,-1,52.7036,49.68579)" d="M0 0C-7.917-6.666-11.852-14.522-12.037-20.236-12.222-25.95-10.186-30.949-1.111-38.885 7.963-46.821 14.167-51.741 18.704-58.804 23.241-65.867 23.611-70.946 21.574-75.787 27.5-71.898 30.741-66.105 31.204-60.232 31.667-54.36 29.352-45.71 22.037-37.06 14.722-28.41 10-23.093 6.944-18.887 3.889-14.681-.602-9.245 0 0"/><path transform="matrix(1,0,0,-1,50.6074,91.61739)" d="M0 0C-4.989-4.139-7.469-9.016-7.586-12.563-7.703-16.11-6.419-19.214-.7-24.141 5.019-29.068 8.928-32.123 11.788-36.507 14.647-40.892 14.881-44.045 13.597-47.05 17.332-44.636 19.374-41.04 19.666-37.394 19.958-33.748 18.499-28.378 13.889-23.008 9.278-17.638 6.302-14.337 4.376-11.726 2.451-9.115-.379-5.74 0 0"/><path transform="matrix(1,0,0,-1,61.9038,31.411393)" d="M0 0C-4.989-4.138-7.469-9.016-7.586-12.563-7.703-16.11-6.419-19.214-.7-24.141 5.019-29.068 8.928-32.123 11.788-36.507 14.647-40.892 14.881-44.045 13.597-47.05 17.332-44.636 19.374-41.04 19.666-37.394 19.958-33.748 18.499-28.378 13.889-23.008 9.279-17.638 6.302-14.337 4.377-11.726 2.451-9.114-.379-5.74 0 0"/></g><g transform="translate(-69.7737,0)"><path transform="matrix(1,0,0,-1,102.1118,104.44019)" d="M0 0H33.064V4.015H4.015V16.201H27.017V20.215H4.015V32.401H33.064V36.416H0Z"/><path transform="matrix(1,0,0,-1,203.793,97.29369)" d="M0 0C0-1.603-1.304-2.908-2.907-2.908H-18.585C-20.188-2.908-21.492-1.603-21.492 0V15.404C-21.492 17.007-20.188 18.312-18.585 18.312H-2.907C-1.304 18.312 0 17.007 0 15.404ZM-2.907 22.326H-18.585C-22.402 22.326-25.507 19.221-25.507 15.404V0C-25.507-3.817-22.402-6.922-18.585-6.922H-2.907C.91-6.922 4.015-3.817 4.015 0V15.404C4.015 19.221 .91 22.326-2.907 22.326"/><path transform="matrix(1,0,0,-1,370.6328,87.1365)" d="M0 0V12.438C0 14.042 1.304 15.346 2.907 15.346H25.229C26.833 15.346 28.138 14.042 28.138 12.438V0ZM25.229 19.361H2.907C-.909 19.361-4.015 16.256-4.015 12.438V0-4.015-17.067H0V-4.015H28.138V-17.067H32.152V-4.015 0 12.438C32.152 16.256 29.047 19.361 25.229 19.361"/><path transform="matrix(1,0,0,-1,319.9492,74.96749)" d="M0 0H-22.6V-29.249H-18.585V-6.866C-18.585-5.292-17.308-4.015-15.733-4.015H.001C1.606-4.015 2.908-5.316 2.908-6.922V-29.249H6.923V-6.922C6.923-3.099 3.823 0 0 0"/><path transform="matrix(1,0,0,-1,287.7812,87.5842)" d="M0 0H-21.492V5.695C-21.492 7.298-20.188 8.602-18.585 8.602H-2.907C-1.305 8.602 0 7.298 0 5.695ZM-2.907 12.617H-18.585C-22.402 12.617-25.508 9.512-25.508 5.695V-9.709C-25.508-13.527-22.402-16.632-18.585-16.632H4.015V-12.617H-18.585C-20.188-12.617-21.492-11.313-21.492-9.709V-4.015H4.015V5.695C4.015 9.512 .909 12.617-2.907 12.617"/><path transform="matrix(1,0,0,-1,216.0449,97.29369)" d="M0 0V31.89H-4.015V0C-4.015-3.817-.909-6.922 2.908-6.922H6.852V-2.908H2.908C1.305-2.908 0-1.603 0 0"/><path transform="matrix(1,0,0,-1,335.8057,65.390399)" d="M0 0H-4.015V-31.891C-4.015-35.708-.909-38.813 2.907-38.813H12.663V-34.798H2.907C1.305-34.798 0-33.494 0-31.891V-13.592H12.663V-9.577H0Z"/><path transform="matrix(1,0,0,-1,0,170.079)" d="M408.873 65.863H412.888V102.304H408.873Z"/><path transform="matrix(1,0,0,-1,241.1504,100.09059)" d="M0 0-13.608 25.123H-18.175L-2.075-4.598H2.067L18.261 25.123H13.688Z"/><path transform="matrix(1,0,0,-1,157.0337,100.09059)" d="M0 0-13.608 25.123H-18.174L-2.075-4.598H2.067L18.261 25.123H13.688Z"/></g></svg></a>
+    <div class="navlinks">
+      <ul>
+        <li><a href="#problem">Problem</a></li>
+        <li><a href="#method">Method</a></li>
+        <li><a href="#results">Results</a></li>
+        <li><a href="#data">Data</a></li>
+        <li><a href="#cite">Cite</a></li>
+      </ul>
+      <span class="vr" aria-hidden="true"></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:.5rem">
+      <button class="icon-btn" id="theme" aria-label="Toggle color theme">
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <a class="btn btn-primary" href="#probe" style="padding:.45rem 1rem">Try the probe
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1v12m0 0L2 8m5 5l5-5"/></svg></a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="hero-inner">
+    <div class="eyebrow reveal">Painting2Code &nbsp;·&nbsp; Image-to-code benchmark</div>
+    <h1 class="reveal">Can a model <em>paint</em> a painting, or only replay its pixels?</h1>
+    <p class="sub reveal">Apprentices learn by copying masterpieces stroke by stroke. We ask multimodal coding agents to do the same: rebuild a museum painting as a program, then check whether that program <u>actually understands how the picture is built</u>.</p>
+    <div class="cta reveal">
+      <a class="btn btn-primary" href="#probe">Try the probe
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 1v12m0 0L2 8m5 5l5-5"/></svg></a>
+      <span class="btn btn-ghost is-off" aria-disabled="true">Paper <span class="soon">soon</span></span>
+      <span class="btn btn-ghost is-off" aria-disabled="true">Code <span class="soon">soon</span></span>
+      <span class="btn btn-ghost is-off" aria-disabled="true">Dataset <span class="soon">soon</span></span>
+      <a class="btn btn-ghost" href="#cite">BibTeX</a>
+    </div>
+    <p class="fine reveal"><b class="mono">200</b> masterpieces &nbsp;·&nbsp; <b class="mono">4</b> museum collections &nbsp;·&nbsp; <b class="mono">17,323</b> rubric criteria</p>
+
+    <div class="gallery reveal" aria-label="Sample masterpieces from the benchmark">
+      <figure tabindex="0"><img src="assets/aic-20684.jpg" alt="Gustave Caillebotte, Paris Street; Rainy Day, 1877" loading="lazy"><figcaption>Caillebotte<br>Paris Street; Rainy Day<span class="mono">1877 · Art Institute of Chicago</span></figcaption></figure>
+      <figure tabindex="0"><img src="assets/aic-95998.jpg" alt="Rembrandt van Rijn, Old Man with a Gold Chain, 1631" loading="lazy"><figcaption>Rembrandt<br>Old Man with a Gold Chain<span class="mono">1631 · Art Institute of Chicago</span></figcaption></figure>
+      <figure tabindex="0"><img src="assets/met-436947.jpg" alt="Edouard Manet, Boating, 1874" loading="lazy"><figcaption>Manet<br>Boating<span class="mono">1874 · The Met</span></figcaption></figure>
+      <figure tabindex="0"><img src="assets/met-49068.jpg" alt="Dapeng Zhengkun, Bamboo in Snow, 1774" loading="lazy"><figcaption>Dapeng Zhengkun<br>Bamboo in Snow<span class="mono">1774 · The Met</span></figcaption></figure>
+      <figure tabindex="0"><img src="assets/cma-1931-440.jpg" alt="Ralph A. Blakelock, Yellow Light, before 1905" loading="lazy"><figcaption>Blakelock<br>Yellow Light<span class="mono">before 1905 · Cleveland Museum of Art</span></figcaption></figure>
+      <figure tabindex="0"><img src="assets/cma-163350.jpg" alt="François LePage, Self-Portrait, 1824" loading="lazy"><figcaption>LePage<br>Self-Portrait<span class="mono">1824 · Cleveland Museum of Art</span></figcaption></figure>
+    </div>
+  </div>
+</header>
+
+<main>
+<section class="section" id="problem">
+  <div class="wrap">
+    <div class="eyebrow reveal">The problem</div>
+    <h2 class="reveal">Pixel scores can't tell <em>painting</em> from replaying.</h2>
+    <p class="lead reveal">Image-to-code benchmarks grade a submission by how closely its rendering resembles the reference. That reward is just as happy with a program that memorises a snapshot, smuggles in the answer, or tangles every element into one unfactorable blob. Such a program does not paint. It replays pixels.</p>
+    <div class="versus reveal">
+      <div class="vcard">
+        <div class="k">Conventional metric</div>
+        <div class="n">0.674</div>
+        <p>CLIP similarity earned by adversarial shortcut submissions that encode no structure of the painting at all.</p>
+      </div>
+      <div class="arrow" aria-hidden="true">same programs&nbsp;→</div>
+      <div class="vcard hl">
+        <div class="k">Under Painting2Code</div>
+        <div class="n">0.0</div>
+        <p>Every shortcut is caught by the fail-closed sandbox before any quality score is computed.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="method">
+  <div class="wrap">
+    <div class="eyebrow reveal">How it works</div>
+    <h2 class="reveal">Grade the picture and the <em>program</em> separately.</h2>
+    <p class="lead reveal">Each submission is evaluated along two decoupled pillars. Visual quality is judged from the render. Program quality is measured by running the code, not by reading it.</p>
+    <div class="steps">
+      <article class="card reveal">
+        <div class="num">01</div>
+        <h3>Paint it in code</h3>
+        <p>The agent receives a public-domain masterpiece and writes a self-contained JavaScript canvas program that repaints it. The program must render offline and produce the same pixels on every run.</p>
+        <div class="tags"><span class="tag">Canvas 2D</span><span class="tag">offline</span><span class="tag">deterministic</span></div>
+      </article>
+      <article class="card reveal">
+        <div class="num">02</div>
+        <h3>Judge the picture</h3>
+        <p>Every painting carries its own image-conditioned rubric tree. Fine-grained criteria from an 18-category ontology score basic visual integrity, reconstruction fidelity, and painterly aesthetics such as brushwork, lighting, and composition.</p>
+        <div class="tags"><span class="tag">Basic</span><span class="tag">Reconstruction</span><span class="tag">Aesthetics</span></div>
+      </article>
+      <article class="card reveal">
+        <div class="num">03</div>
+        <h3>Edit the program</h3>
+        <p>The executed editability probe applies a concrete source edit to a copy of the program, re-renders it, and measures where the pixels moved. A small, local change means the element was really there in the code.</p>
+        <div class="tags"><span class="tag">localized</span><span class="tag">unreachable</span><span class="tag">global bleed</span><span class="tag">runtime collapse</span></div>
+      </article>
+    </div>
+    <div class="sandbox reveal">
+      <b>Fail-closed sandbox.</b>
+      <span>Seven invariants are checked before scoring: no network, no access to the reference, no raster or SVG payloads, and byte-identical renders. Any violation scores <span class="mono">0.0</span>.</span>
+    </div>
+
+    <div class="demo reveal" id="probe">
+      <div class="demo-head">
+        <div>
+          <div class="eyebrow" style="color:rgb(var(--color-text-secondary))">Try the probe</div>
+          <div style="font-weight:500;margin-top:.2rem">Same picture, same edit, two different programs.</div>
+        </div>
+        <div class="seg" role="group" aria-label="Program structure">
+          <button id="m-mod" aria-pressed="true">Modular program</button>
+          <button id="m-ent" aria-pressed="false">Entangled program</button>
+        </div>
+      </div>
+      <div class="demo-body">
+        <div class="pane"><div class="lbl">Source edit</div><pre class="code" id="code"></pre></div>
+        <div class="pane"><div class="lbl">Before</div><canvas id="cv-a" width="320" height="240" aria-label="Render before the edit"></canvas></div>
+        <div class="pane"><div class="lbl">After edit</div><canvas id="cv-b" width="320" height="240" aria-label="Render after the edit"></canvas></div>
+        <div class="pane"><div class="lbl">Pixel difference</div><canvas id="cv-d" width="320" height="240" aria-label="Difference mask between the two renders"></canvas></div>
+      </div>
+      <div class="verdict">
+        <span id="pill" class="pill pass"><i></i><span id="pill-t">Localized change</span></span>
+        <span class="muted">Changed pixels: <b class="mono" id="frac" style="color:rgb(var(--color-text-primary))">0%</b> of the canvas</span>
+        <button class="btn btn-ghost" id="replay" style="padding:.35rem .8rem;font-size:.78rem;margin-left:auto">Re-run edit</button>
+      </div>
+      <p class="demo-note">Illustration of the probe mechanism. Both programs draw an identical scene; the difference mask is computed live from the two renders in your browser.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="results">
+  <div class="wrap">
+    <div class="eyebrow reveal">Results</div>
+    <h2 class="reveal">Looking right is not the same as being <em>built</em> right.</h2>
+    <p class="lead reveal">Frontier models evaluated through two agent harnesses, OpenAI Codex and Anthropic Claude Code. Visual dimensions are scored by an independent multimodal judge; editability comes from executed probes and is reported outside the visual score.</p>
+
+    <div class="tbl-wrap reveal">
+      <table>
+        <thead><tr><th>Model</th><th>Harness</th><th>Basic</th><th>Recon.</th><th>Aesthetic</th><th>Editability</th><th>4-dim mean</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="findings">
+      <div class="card finding reveal">
+        <div class="num">Fidelity vs. editability</div>
+        <div class="big">ρ = 0.26</div>
+        <p>Reconstruction fidelity barely predicts executed editability, while the two render-based dimensions move together at <span class="mono">ρ = 0.77</span>.</p>
+      </div>
+      <div class="card finding reveal">
+        <div class="num">The painterly gap</div>
+        <div class="big">7.1–16.4 <small>points</small></div>
+        <p>Across every configuration, painterly aesthetics trails basic visual integrity. Models draw outlines and fills well, but not impasto, glazing, or wash.</p>
+      </div>
+      <div class="card finding reveal">
+        <div class="num">Harness sensitivity</div>
+        <div class="big">64.9 → 35.0</div>
+        <p>The same open-weight model loses almost half its 4-dimension mean when moved from the Codex harness to Claude Code.</p>
+      </div>
+    </div>
+
+    <figure class="fig reveal">
+      <img src="assets/decoupling_scatter.png" alt="Three scatter plots: aesthetics vs reconstruction (rho 0.77), editability vs reconstruction (rho 0.26), visual mean vs agent steps (rho 0.23)" loading="lazy">
+      <figcaption>Render-based dimensions cohere (left), but editability decouples from reconstruction fidelity (middle), and more agent steps buy little visual quality (right).</figcaption>
+    </figure>
+    <figure class="fig reveal">
+      <img src="assets/qualitative_case_studies.png" alt="Two case studies. Case A: a modular program whose edit stays inside the umbrella. Case B: a high-fidelity but entangled program whose single edit recolors the whole canvas." loading="lazy">
+      <figcaption>Case A edits one umbrella and nothing else. Case B reconstructs its painting more faithfully, yet one parameter change bleeds across the entire canvas.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="section" id="data">
+  <div class="wrap">
+    <div class="eyebrow reveal">The benchmark</div>
+    <h2 class="reveal">Two millennia of art, held to one <em>contract</em>.</h2>
+    <p class="lead reveal">Object-level records from four open-access museum collections, each with provenance and rights fields. Every artwork is public domain, and every case ships as a self-contained bundle.</p>
+    <div class="stats reveal">
+      <div class="stat"><div class="n">200</div><div class="k">Masterpieces</div></div>
+      <div class="stat"><div class="n">17,323</div><div class="k">Rubric criteria</div></div>
+      <div class="stat"><div class="n">18</div><div class="k">Leaf categories</div></div>
+      <div class="stat"><div class="n">4</div><div class="k">Museum collections</div></div>
+    </div>
+    <div class="dists">
+      <div class="dist reveal"><h4>Visual genre</h4><div id="d-genre"></div></div>
+      <div class="dist reveal"><h4>Medium &amp; support</h4><div id="d-medium"></div></div>
+      <div class="dist reveal"><h4>Artistic tradition</h4><div id="d-trad"></div></div>
+      <div class="dist reveal"><h4>Epoch</h4><div id="d-epoch"></div></div>
+    </div>
+    <p class="muted reveal" style="margin-top:1.5rem;font-size:.85rem">Collections: The Cleveland Museum of Art, The Metropolitan Museum of Art, Art Institute of Chicago, Museum of New Zealand Te Papa Tongarewa.</p>
+  </div>
+</section>
+
+<section class="section" id="cite">
+  <div class="wrap">
+    <div class="eyebrow reveal">Citation</div>
+    <h2 class="reveal">Cite this work</h2>
+    <div class="bib reveal">
+      <button class="btn btn-ghost" id="copy">Copy</button>
+<pre id="bibtex">@article{painting2code2026,
+  title   = {Painting2Code: Can a Model Paint a Painting,
+             or Only Replay Its Pixels?},
+  author  = {Anonymous},
+  journal = {Under review},
+  year    = {2026}
+}</pre>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="row">
+    <a class="logo" href="https://evolvent.co" aria-label="Evolvent AI"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 55.530 347.114 59.019" fill="currentColor" role="img" aria-label="Evolvent AI"><g transform="translate(-20.7659,41.4174) scale(0.51297)"><path transform="matrix(1,0,0,-1,52.7036,49.68579)" d="M0 0C-7.917-6.666-11.852-14.522-12.037-20.236-12.222-25.95-10.186-30.949-1.111-38.885 7.963-46.821 14.167-51.741 18.704-58.804 23.241-65.867 23.611-70.946 21.574-75.787 27.5-71.898 30.741-66.105 31.204-60.232 31.667-54.36 29.352-45.71 22.037-37.06 14.722-28.41 10-23.093 6.944-18.887 3.889-14.681-.602-9.245 0 0"/><path transform="matrix(1,0,0,-1,50.6074,91.61739)" d="M0 0C-4.989-4.139-7.469-9.016-7.586-12.563-7.703-16.11-6.419-19.214-.7-24.141 5.019-29.068 8.928-32.123 11.788-36.507 14.647-40.892 14.881-44.045 13.597-47.05 17.332-44.636 19.374-41.04 19.666-37.394 19.958-33.748 18.499-28.378 13.889-23.008 9.278-17.638 6.302-14.337 4.376-11.726 2.451-9.115-.379-5.74 0 0"/><path transform="matrix(1,0,0,-1,61.9038,31.411393)" d="M0 0C-4.989-4.138-7.469-9.016-7.586-12.563-7.703-16.11-6.419-19.214-.7-24.141 5.019-29.068 8.928-32.123 11.788-36.507 14.647-40.892 14.881-44.045 13.597-47.05 17.332-44.636 19.374-41.04 19.666-37.394 19.958-33.748 18.499-28.378 13.889-23.008 9.279-17.638 6.302-14.337 4.377-11.726 2.451-9.114-.379-5.74 0 0"/></g><g transform="translate(-69.7737,0)"><path transform="matrix(1,0,0,-1,102.1118,104.44019)" d="M0 0H33.064V4.015H4.015V16.201H27.017V20.215H4.015V32.401H33.064V36.416H0Z"/><path transform="matrix(1,0,0,-1,203.793,97.29369)" d="M0 0C0-1.603-1.304-2.908-2.907-2.908H-18.585C-20.188-2.908-21.492-1.603-21.492 0V15.404C-21.492 17.007-20.188 18.312-18.585 18.312H-2.907C-1.304 18.312 0 17.007 0 15.404ZM-2.907 22.326H-18.585C-22.402 22.326-25.507 19.221-25.507 15.404V0C-25.507-3.817-22.402-6.922-18.585-6.922H-2.907C.91-6.922 4.015-3.817 4.015 0V15.404C4.015 19.221 .91 22.326-2.907 22.326"/><path transform="matrix(1,0,0,-1,370.6328,87.1365)" d="M0 0V12.438C0 14.042 1.304 15.346 2.907 15.346H25.229C26.833 15.346 28.138 14.042 28.138 12.438V0ZM25.229 19.361H2.907C-.909 19.361-4.015 16.256-4.015 12.438V0-4.015-17.067H0V-4.015H28.138V-17.067H32.152V-4.015 0 12.438C32.152 16.256 29.047 19.361 25.229 19.361"/><path transform="matrix(1,0,0,-1,319.9492,74.96749)" d="M0 0H-22.6V-29.249H-18.585V-6.866C-18.585-5.292-17.308-4.015-15.733-4.015H.001C1.606-4.015 2.908-5.316 2.908-6.922V-29.249H6.923V-6.922C6.923-3.099 3.823 0 0 0"/><path transform="matrix(1,0,0,-1,287.7812,87.5842)" d="M0 0H-21.492V5.695C-21.492 7.298-20.188 8.602-18.585 8.602H-2.907C-1.305 8.602 0 7.298 0 5.695ZM-2.907 12.617H-18.585C-22.402 12.617-25.508 9.512-25.508 5.695V-9.709C-25.508-13.527-22.402-16.632-18.585-16.632H4.015V-12.617H-18.585C-20.188-12.617-21.492-11.313-21.492-9.709V-4.015H4.015V5.695C4.015 9.512 .909 12.617-2.907 12.617"/><path transform="matrix(1,0,0,-1,216.0449,97.29369)" d="M0 0V31.89H-4.015V0C-4.015-3.817-.909-6.922 2.908-6.922H6.852V-2.908H2.908C1.305-2.908 0-1.603 0 0"/><path transform="matrix(1,0,0,-1,335.8057,65.390399)" d="M0 0H-4.015V-31.891C-4.015-35.708-.909-38.813 2.907-38.813H12.663V-34.798H2.907C1.305-34.798 0-33.494 0-31.891V-13.592H12.663V-9.577H0Z"/><path transform="matrix(1,0,0,-1,0,170.079)" d="M408.873 65.863H412.888V102.304H408.873Z"/><path transform="matrix(1,0,0,-1,241.1504,100.09059)" d="M0 0-13.608 25.123H-18.175L-2.075-4.598H2.067L18.261 25.123H13.688Z"/><path transform="matrix(1,0,0,-1,157.0337,100.09059)" d="M0 0-13.608 25.123H-18.174L-2.075-4.598H2.067L18.261 25.123H13.688Z"/></g></svg></a>
+    <div class="links">
+      <a href="https://evolvent.co">evolvent.co</a>
+      <a href="https://github.com/evolvent-ai">GitHub</a>
+      <span class="mono">© 2026 Evolvent AI</span>
+    </div>
+    <p class="credits">Artwork images: Art Institute of Chicago, The Metropolitan Museum of Art (public domain), and The Cleveland Museum of Art (CC0).</p>
+  </div>
+</footer>
+
+<script>
+/* theme */
+document.getElementById('theme').addEventListener('click',()=>{
+  const d=document.documentElement.classList.toggle('dark');
+  try{localStorage.setItem('theme',d?'dark':'light')}catch(e){}
+});
+
+/* reveal on scroll */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);
+  e.target.querySelectorAll('.fill').forEach(f=>f.style.width=f.dataset.w+'%');}}),{threshold:.12});
+document.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=(el.closest('.hero')?i*0.12:0)+'s';io.observe(el)});
+
+/* results table — values from Table 1 of the paper */
+const rows=[
+  ['Harness: Codex'],
+  ['gpt-6-astra','Codex',84.3,81.2,68.6,62.8,74.2],
+  ['gpt-5.6-sol','Codex',81.4,75.7,65.0,68.1,72.6],
+  ['gemini-3.8-flash','Codex',79.2,77.7,65.7,60.1,70.7],
+  ['seed-2.1-pro','Codex',68.4,69.8,54.9,66.5,64.9],
+  ['Harness: Claude Code'],
+  ['claude-fable-5-1','Claude Code',81.7,79.9,67.3,61.3,72.6],
+  ['claude-opus-5','Claude Code',78.7,78.2,63.8,48.0,67.2],
+  ['seed-2.1-pro','Claude Code',35.4,44.4,28.3,31.9,35.0],
+];
+const tb=document.getElementById('tbody');
+const groups=[];let cur;
+rows.forEach(r=>{if(r.length===1){cur=[];groups.push(cur)}else cur.push(r)});
+const best=groups.map(g=>[2,3,4,5,6].map(i=>Math.max(...g.map(r=>r[i]))));
+let gi=-1;
+rows.forEach(r=>{
+  const tr=document.createElement('tr');
+  if(r.length===1){gi++;tr.className='grp';tr.innerHTML=`<td colspan="7">${r[0]}</td>`;tb.appendChild(tr);return}
+  tr.innerHTML=`<td>${r[0]}</td><td>${r[1]}</td>`+[2,3,4,5,6].map((i,k)=>{
+    const v=r[i].toFixed(1),b=r[i]===best[gi][k];
+    const cls=i===5?' class="edit"':'';
+    return `<td${cls}>${b?'<b>'+v+'</b>':v}</td>`}).join('');
+  tb.appendChild(tr);
+});
+
+/* distributions — Table 3 of the paper (200 artworks) */
+const dists={
+  'd-genre':[['Landscape & atmosphere',27],['Figurative & portraiture',24],['Narrative & religious',22.5],['Still life & objects',13.5],['Modernism & abstract',13]],
+  'd-medium':[['Oil on canvas / panel',45],['Ink & wash',29],['Tempera, gouache, encaustic',14.5],['Watercolor & mixed',11.5]],
+  'd-trad':[['European classical & Baroque',32],['East Asian literati & ukiyo-e',28.5],['Impressionism & post-',24],['Persian & South Asian',8.5],['Modernism & regional',7]],
+  'd-epoch':[['19th century',42.5],['Renaissance & Baroque',26.5],['20th-century modernism',23.5],['Ancient & medieval',7.5]],
+};
+for(const [id,items] of Object.entries(dists)){
+  document.getElementById(id).innerHTML=items.map(([k,v])=>`<div class="drow"><span>${k}</span><span class="track"><span class="fill" data-w="${v/45*100}"></span></span><span class="v">${v}%</span></div>`).join('');
+}
+
+/* copy bibtex */
+document.getElementById('copy').addEventListener('click',async e=>{
+  try{await navigator.clipboard.writeText(document.getElementById('bibtex').textContent);e.target.textContent='Copied'}catch(_){e.target.textContent='Select & copy'}
+  setTimeout(()=>e.target.textContent='Copy',1600);
+});
+
+/* ---------- executed-edit probe demo ---------- */
+const W=320,H=240;
+function scene(ctx,p){
+  // sky
+  const g=ctx.createLinearGradient(0,0,0,150);g.addColorStop(0,p.skyTop);g.addColorStop(1,p.skyLow);
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,150);
+  // sun
+  ctx.fillStyle=p.sun;ctx.beginPath();ctx.arc(232,62,22,0,Math.PI*2);ctx.fill();
+  // far hills
+  ctx.fillStyle=p.hillFar;ctx.beginPath();ctx.moveTo(0,130);ctx.bezierCurveTo(60,95,110,120,160,104);ctx.bezierCurveTo(210,90,260,118,320,100);ctx.lineTo(320,150);ctx.lineTo(0,150);ctx.fill();
+  // sea
+  ctx.fillStyle=p.sea;ctx.fillRect(0,150,W,90);
+  ctx.strokeStyle=p.wave;ctx.lineWidth=1.2;
+  for(let y=162;y<240;y+=13){ctx.beginPath();for(let x=0;x<=W;x+=8)ctx.lineTo(x,y+Math.sin(x/18+y)*1.6);ctx.stroke()}
+  // tree
+  ctx.fillStyle=p.trunk;ctx.fillRect(52,96,6,60);
+  ctx.fillStyle=p.leaf;[[55,88,26],[38,100,18],[72,98,18]].forEach(([x,y,r])=>{ctx.beginPath();ctx.ellipse(x,y,r,r*.62,0,0,Math.PI*2);ctx.fill()});
+  // boat
+  ctx.fillStyle=p.hull;ctx.beginPath();ctx.moveTo(176,186);ctx.lineTo(236,186);ctx.lineTo(226,198);ctx.lineTo(186,198);ctx.fill();
+  ctx.fillStyle=p.sail;ctx.beginPath();ctx.moveTo(204,184);ctx.lineTo(204,140);ctx.lineTo(228,182);ctx.fill();
+}
+const base={skyTop:'#9db8d6',skyLow:'#f2d6a8',sun:'#f6c35b',hillFar:'#8a9a8c',sea:'#4f7895',wave:'rgba(255,255,255,.35)',trunk:'#5a4330',leaf:'#3f6a46',hull:'#6b3f2a',sail:'#efe6d2'};
+function hueShift(hex,deg){ // simple HSL rotate
+  const n=parseInt(hex.slice(1),16);let r=(n>>16)/255,g=(n>>8&255)/255,b=(n&255)/255;
+  const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let h,s,l=(mx+mn)/2;
+  if(mx===mn){h=s=0}else{const d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);h=mx===r?(g-b)/d+(g<b?6:0):mx===g?(b-r)/d+2:(r-g)/d+4;h/=6}
+  h=(h+deg/360+1)%1;const f=(p,q,t)=>{t=(t+1)%1;return t<1/6?p+(q-p)*6*t:t<.5?q:t<2/3?p+(q-p)*(2/3-t)*6:p};
+  const q=l<.5?l*(1+s):l+s-l*s,p=2*l-q;
+  return '#'+[f(p,q,h+1/3),f(p,q,h),f(p,q,h-1/3)].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join('');
+}
+const variants={
+  mod:{
+    code:`<span class="c">// declarative scene, one layer per entity</span>
+const SCENE = {
+  sky:   { top: '#9db8d6', low: '#f2d6a8' },
+  sun:   { fill: <span class="hl">'#f6c35b'</span> },
+  hills: { fill: '#8a9a8c' },
+  boat:  { hull: '#6b3f2a', sail: '#efe6d2' },
+};
+<span class="c">// probe: find '#f6c35b' → replace '#e0603a'</span>
+render(SCENE);`,
+    edit:p=>({...p,sun:'#e0603a'})
+  },
+  ent:{
+    code:`<span class="c">// one palette shared by every stroke</span>
+let tint = <span class="hl">0</span>;  <span class="c">// "sun warmth"</span>
+function draw() {
+  for (const s of STROKES)      <span class="c">// 1,200+ paths</span>
+    ctx.fillStyle = shift(s.color, tint),
+    ctx.fill(s.path);
+}
+<span class="c">// probe: find 'tint = 0' → replace 'tint = -32'</span>
+draw();`,
+    edit:p=>Object.fromEntries(Object.entries(p).map(([k,v])=>[k,v.startsWith('#')?hueShift(v,-32):v]))
+  }
+};
+const cA=document.getElementById('cv-a').getContext('2d'),cB=document.getElementById('cv-b').getContext('2d'),cD=document.getElementById('cv-d').getContext('2d');
+let mode='mod',anim;
+function run(){
+  cancelAnimationFrame(anim);
+  const v=variants[mode];document.getElementById('code').innerHTML=v.code;
+  scene(cA,base);scene(cB,v.edit(base));
+  const a=cA.getImageData(0,0,W,H).data,b=cB.getImageData(0,0,W,H).data;
+  const dark=document.documentElement.classList.contains('dark');
+  const out=cD.createImageData(W,H);let changed=0;
+  const mask=new Uint8Array(W*H);
+  for(let i=0,j=0;i<a.length;i+=4,j++){
+    const la=.299*a[i]+.587*a[i+1]+.114*a[i+2],lb=.299*b[i]+.587*b[i+1]+.114*b[i+2];
+    const d=Math.abs(la-lb)>12||Math.abs(a[i]-b[i])+Math.abs(a[i+1]-b[i+1])+Math.abs(a[i+2]-b[i+2])>36;
+    mask[j]=d;changed+=d;
+  }
+  const pct=changed/(W*H)*100,local=pct<10;
+  const on=local?[22,160,110]:[220,70,70],off=dark?[18,18,18]:[238,238,238];
+  // sweep animation
+  let x=0;const step=()=>{x=Math.min(W,x+14);
+    for(let yy=0;yy<H;yy++)for(let xx=0;xx<x;xx++){const j=yy*W+xx,i=j*4,c=mask[j]?on:off;out.data[i]=c[0];out.data[i+1]=c[1];out.data[i+2]=c[2];out.data[i+3]=255}
+    cD.putImageData(out,0,0);
+    if(x<W)anim=requestAnimationFrame(step);};
+  step();
+  document.getElementById('frac').textContent=pct.toFixed(1)+'%';
+  const pill=document.getElementById('pill');pill.className='pill '+(local?'pass':'fail');
+  document.getElementById('pill-t').textContent=local?'Localized change · modular':'Global bleed · entangled';
+}
+function setMode(m){mode=m;document.getElementById('m-mod').setAttribute('aria-pressed',m==='mod');document.getElementById('m-ent').setAttribute('aria-pressed',m==='ent');run()}
+document.getElementById('m-mod').onclick=()=>setMode('mod');
+document.getElementById('m-ent').onclick=()=>setMode('ent');
+document.getElementById('replay').onclick=run;
+document.getElementById('theme').addEventListener('click',run);
+run();
+</script>
+</body>
+</html>
