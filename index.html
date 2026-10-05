@@ -74,11 +74,11 @@ nav .row{display:flex;align-items:center;justify-content:space-between;padding:.
 .soon{font-family:'JetBrains Mono',monospace;font-size:.65rem;padding:.1rem .45rem;border-radius:999px;border:1px solid rgb(var(--color-accent-primary)/.4);color:rgb(var(--color-accent-primary))}
 
 /* hero */
-.hero{min-height:100svh;display:flex;align-items:center;justify-content:center;padding:7rem 1.5rem 3rem;position:relative}
+.hero{min-height:100svh;display:flex;align-items:flex-start;justify-content:center;padding:6rem 1.5rem 3rem;position:relative}
 .hero::before{content:'';position:absolute;inset:0;z-index:-1;background-image:linear-gradient(rgb(var(--color-border)/.035) 1px,transparent 1px),linear-gradient(90deg,rgb(var(--color-border)/.035) 1px,transparent 1px);background-size:60px 60px;-webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 40%,#000 0%,transparent 75%);mask-image:radial-gradient(ellipse 70% 60% at 50% 40%,#000 0%,transparent 75%)}
 .hero-inner{width:100%;max-width:72rem;text-align:center;margin:0 auto}
 .hero h1{max-width:52rem;margin-left:auto;margin-right:auto}
-.hero h1{font-family:'Space Grotesk',sans-serif;font-weight:300;font-size:clamp(2.6rem,6.4vw,4.75rem);line-height:1.05;letter-spacing:-.03em;margin-top:1.4rem}
+.hero h1{font-family:'Space Grotesk',sans-serif;font-weight:300;font-size:clamp(2.4rem,5.4vw,4.25rem);line-height:1.05;letter-spacing:-.03em;margin-top:1.4rem}
 .hero .sub{margin:1.8rem auto 0;max-width:40rem;font-size:clamp(1rem,1.6vw,1.15rem);color:rgb(var(--color-text-secondary))}
 .hero .sub u{text-decoration:underline;text-decoration-color:rgb(var(--color-accent-primary)/.7);text-decoration-thickness:1.5px;text-underline-offset:5px;color:rgb(var(--color-text-primary))}
 .cta{display:flex;flex-wrap:wrap;gap:.75rem;justify-content:center;margin-top:2.4rem}
@@ -143,7 +143,7 @@ pre.code .c{color:rgb(var(--color-text-secondary))}
 
 /* video */
 .video-wrap{margin-top:3rem}
-.hero-video{margin-top:3.2rem}
+.hero-video{margin-top:2.4rem}
 .hero-video figcaption{margin-left:auto;margin-right:auto;text-align:center}
 .video-wrap video{display:block;width:100%;height:auto;aspect-ratio:16/9;border-radius:1rem;border:1px solid rgb(var(--color-border)/.12);background:#fff;box-shadow:0 0 60px rgba(76,84,236,.10)}
 .video-wrap figcaption{margin-top:.8rem;font-size:.85rem;color:rgb(var(--color-text-secondary));max-width:52rem}
@@ -233,6 +233,10 @@ footer .credits{max-width:46rem;text-align:center;line-height:1.6}
   <div class="hero-inner">
     <div class="eyebrow reveal">Painting2Code &nbsp;·&nbsp; Image-to-code benchmark</div>
     <h1 class="reveal">Can a model <em>paint</em> a painting, or only replay its pixels?</h1>
+    <figure class="video-wrap hero-video reveal" id="watch">
+      <video id="four-models" src="assets/four_models.mp4" poster="assets/four_models_poster.jpg" controls muted autoplay playsinline preload="auto"></video>
+      <figcaption>Four frontier agents repaint <i>Bamboo in Snow</i> (Dapeng Zhengkun, 1774). Every frame replays the submitted program's own Canvas calls, paced by visual progress.</figcaption>
+    </figure>
     <p class="sub reveal">Apprentices learn by copying masterpieces stroke by stroke. We ask multimodal coding agents to do the same: rebuild a museum painting as a program, then check whether that program <u>actually understands how the picture is built</u>.</p>
     <div class="cta reveal">
       <a class="btn btn-primary" href="#probe">Try the probe
@@ -242,10 +246,6 @@ footer .credits{max-width:46rem;text-align:center;line-height:1.6}
       <span class="btn btn-ghost is-off" aria-disabled="true">Dataset <span class="soon">soon</span></span>
       <a class="btn btn-ghost" href="#cite">BibTeX</a>
     </div>
-    <figure class="video-wrap hero-video reveal" id="watch">
-      <video id="four-models" src="assets/four_models.mp4" poster="assets/four_models_poster.jpg" controls muted autoplay playsinline preload="auto"></video>
-      <figcaption>Four frontier agents repaint <i>Bamboo in Snow</i> (Dapeng Zhengkun, 1774). Every frame replays the submitted program's own Canvas calls, paced by visual progress.</figcaption>
-    </figure>
     <p class="fine reveal"><b class="mono">200</b> masterpieces &nbsp;·&nbsp; <b class="mono">4</b> museum collections &nbsp;·&nbsp; <b class="mono">17,323</b> rubric criteria</p>
 
   </div>
