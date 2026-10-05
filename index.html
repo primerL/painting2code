@@ -139,6 +139,11 @@ pre.code .c{color:rgb(var(--color-text-secondary))}
 .pill i{width:.45rem;height:.45rem;border-radius:999px;background:currentColor}
 .demo-note{padding:0 1.25rem 1rem;font-size:.78rem;color:rgb(var(--color-text-secondary))}
 
+/* video */
+.video-wrap{margin-top:3rem}
+.video-wrap video{display:block;width:100%;height:auto;aspect-ratio:16/9;border-radius:1rem;border:1px solid rgb(var(--color-border)/.12);background:#fff;box-shadow:0 0 60px rgba(76,84,236,.10)}
+.video-wrap figcaption{margin-top:.8rem;font-size:.85rem;color:rgb(var(--color-text-secondary));max-width:52rem}
+
 /* results */
 .tbl-wrap{margin-top:3rem;border:1px solid rgb(var(--color-border)/.12);border-radius:1rem;overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:.9rem;min-width:640px}
@@ -201,6 +206,7 @@ footer .credits{max-width:46rem;text-align:center;line-height:1.6}
       <ul>
         <li><a href="#problem">Problem</a></li>
         <li><a href="#method">Method</a></li>
+        <li><a href="#watch">Watch</a></li>
         <li><a href="#results">Results</a></li>
         <li><a href="#data">Data</a></li>
         <li><a href="#cite">Cite</a></li>
@@ -320,6 +326,18 @@ footer .credits{max-width:46rem;text-align:center;line-height:1.6}
       </div>
       <p class="demo-note">Illustration of the probe mechanism. Both programs draw an identical scene; the difference mask is computed live from the two renders in your browser.</p>
     </div>
+  </div>
+</section>
+
+<section class="section" id="watch">
+  <div class="wrap">
+    <div class="eyebrow reveal">Watch them paint</div>
+    <h2 class="reveal">Four agents, one masterpiece, every <em>stroke</em> replayed.</h2>
+    <p class="lead reveal">Four frontier models rebuilt <i>Bamboo in Snow</i> (Dapeng Zhengkun, 1774) as Canvas programs. We replay each submitted program's own drawing calls in order, so you can watch how each one composes the painting.</p>
+    <figure class="video-wrap reveal">
+      <video id="four-models" src="assets/four_models.mp4" poster="assets/four_models_poster.jpg" controls muted playsinline preload="metadata"></video>
+      <figcaption>Single pass@1 rollouts on one painting (met-49068) through the Codex harness. Frames are paced by visual progress, not wall-clock time.</figcaption>
+    </figure>
   </div>
 </section>
 
@@ -464,6 +482,15 @@ const dists={
 };
 for(const [id,items] of Object.entries(dists)){
   document.getElementById(id).innerHTML=items.map(([k,v])=>`<div class="drow"><span>${k}</span><span class="track"><span class="fill" data-w="${v/45*100}"></span></span><span class="v">${v}%</span></div>`).join('');
+}
+
+/* autoplay the comparison video once it scrolls into view */
+const vid=document.getElementById('four-models');
+if(vid&&'IntersectionObserver' in window){
+  const vio=new IntersectionObserver(es=>es.forEach(e=>{
+    if(e.isIntersecting&&vid.paused&&!vid.dataset.started){vid.dataset.started='1';vid.play().catch(()=>{})}
+  }),{threshold:.5});
+  vio.observe(vid);
 }
 
 /* copy bibtex */
