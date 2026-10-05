@@ -62,8 +62,9 @@ nav .row{display:flex;align-items:center;justify-content:space-between;padding:.
 .icon-btn svg{width:16px;height:16px}
 .sun{display:none}.dark .sun{display:block}.dark .moon{display:none}
 
+@media(max-width:520px){nav .btn-primary{display:none}}
 /* buttons */
-.btn{display:inline-flex;align-items:center;gap:.5rem;border-radius:.375rem;font-weight:500;letter-spacing:.02em;font-size:.875rem;padding:.65rem 1.25rem;transition:all .2s ease-out;border:1px solid transparent}
+.btn{display:inline-flex;align-items:center;gap:.5rem;white-space:nowrap;border-radius:.375rem;font-weight:500;letter-spacing:.02em;font-size:.875rem;padding:.65rem 1.25rem;transition:all .2s ease-out;border:1px solid transparent}
 .btn-primary{background:rgb(var(--color-text-primary));color:rgb(var(--color-bg-deep));box-shadow:0 1px 0 0 rgba(255,255,255,.08) inset,0 1px 2px 0 rgba(0,0,0,.12)}
 .btn-primary:hover{box-shadow:0 0 16px rgba(76,84,236,.4),0 1px 2px 0 rgba(0,0,0,.12);transform:translateY(-2px)}
 .btn-ghost{border-color:rgb(var(--color-border)/.2);color:rgb(var(--color-text-primary))}
@@ -75,12 +76,13 @@ nav .row{display:flex;align-items:center;justify-content:space-between;padding:.
 /* hero */
 .hero{min-height:100svh;display:flex;align-items:center;justify-content:center;padding:7rem 1.5rem 3rem;position:relative}
 .hero::before{content:'';position:absolute;inset:0;z-index:-1;background-image:linear-gradient(rgb(var(--color-border)/.035) 1px,transparent 1px),linear-gradient(90deg,rgb(var(--color-border)/.035) 1px,transparent 1px);background-size:60px 60px;-webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 40%,#000 0%,transparent 75%);mask-image:radial-gradient(ellipse 70% 60% at 50% 40%,#000 0%,transparent 75%)}
-.hero-inner{max-width:52rem;text-align:center;margin:0 auto}
+.hero-inner{width:100%;max-width:72rem;text-align:center;margin:0 auto}
+.hero h1{max-width:52rem;margin-left:auto;margin-right:auto}
 .hero h1{font-family:'Space Grotesk',sans-serif;font-weight:300;font-size:clamp(2.6rem,6.4vw,4.75rem);line-height:1.05;letter-spacing:-.03em;margin-top:1.4rem}
 .hero .sub{margin:1.8rem auto 0;max-width:40rem;font-size:clamp(1rem,1.6vw,1.15rem);color:rgb(var(--color-text-secondary))}
 .hero .sub u{text-decoration:underline;text-decoration-color:rgb(var(--color-accent-primary)/.7);text-decoration-thickness:1.5px;text-underline-offset:5px;color:rgb(var(--color-text-primary))}
 .cta{display:flex;flex-wrap:wrap;gap:.75rem;justify-content:center;margin-top:2.4rem}
-.fine{margin-top:3rem;font-size:.8rem;letter-spacing:.06em;color:rgb(var(--color-text-secondary)/.85)}
+.fine{margin-top:2.2rem;font-size:.8rem;letter-spacing:.06em;color:rgb(var(--color-text-secondary)/.85)}
 .fine b{font-weight:500;color:rgb(var(--color-text-primary))}
 
 /* gallery */
@@ -141,6 +143,8 @@ pre.code .c{color:rgb(var(--color-text-secondary))}
 
 /* video */
 .video-wrap{margin-top:3rem}
+.hero-video{margin-top:3.2rem}
+.hero-video figcaption{margin-left:auto;margin-right:auto;text-align:center}
 .video-wrap video{display:block;width:100%;height:auto;aspect-ratio:16/9;border-radius:1rem;border:1px solid rgb(var(--color-border)/.12);background:#fff;box-shadow:0 0 60px rgba(76,84,236,.10)}
 .video-wrap figcaption{margin-top:.8rem;font-size:.85rem;color:rgb(var(--color-text-secondary));max-width:52rem}
 
@@ -238,16 +242,12 @@ footer .credits{max-width:46rem;text-align:center;line-height:1.6}
       <span class="btn btn-ghost is-off" aria-disabled="true">Dataset <span class="soon">soon</span></span>
       <a class="btn btn-ghost" href="#cite">BibTeX</a>
     </div>
+    <figure class="video-wrap hero-video reveal" id="watch">
+      <video id="four-models" src="assets/four_models.mp4" poster="assets/four_models_poster.jpg" controls muted autoplay playsinline preload="auto"></video>
+      <figcaption>Four frontier agents repaint <i>Bamboo in Snow</i> (Dapeng Zhengkun, 1774). Every frame replays the submitted program's own Canvas calls, paced by visual progress.</figcaption>
+    </figure>
     <p class="fine reveal"><b class="mono">200</b> masterpieces &nbsp;·&nbsp; <b class="mono">4</b> museum collections &nbsp;·&nbsp; <b class="mono">17,323</b> rubric criteria</p>
 
-    <div class="gallery reveal" aria-label="Sample masterpieces from the benchmark">
-      <figure tabindex="0"><img src="assets/aic-20684.jpg" alt="Gustave Caillebotte, Paris Street; Rainy Day, 1877" loading="lazy"><figcaption>Caillebotte<br>Paris Street; Rainy Day<span class="mono">1877 · Art Institute of Chicago</span></figcaption></figure>
-      <figure tabindex="0"><img src="assets/aic-95998.jpg" alt="Rembrandt van Rijn, Old Man with a Gold Chain, 1631" loading="lazy"><figcaption>Rembrandt<br>Old Man with a Gold Chain<span class="mono">1631 · Art Institute of Chicago</span></figcaption></figure>
-      <figure tabindex="0"><img src="assets/met-436947.jpg" alt="Edouard Manet, Boating, 1874" loading="lazy"><figcaption>Manet<br>Boating<span class="mono">1874 · The Met</span></figcaption></figure>
-      <figure tabindex="0"><img src="assets/met-49068.jpg" alt="Dapeng Zhengkun, Bamboo in Snow, 1774" loading="lazy"><figcaption>Dapeng Zhengkun<br>Bamboo in Snow<span class="mono">1774 · The Met</span></figcaption></figure>
-      <figure tabindex="0"><img src="assets/cma-1931-440.jpg" alt="Ralph A. Blakelock, Yellow Light, before 1905" loading="lazy"><figcaption>Blakelock<br>Yellow Light<span class="mono">before 1905 · Cleveland Museum of Art</span></figcaption></figure>
-      <figure tabindex="0"><img src="assets/cma-163350.jpg" alt="François LePage, Self-Portrait, 1824" loading="lazy"><figcaption>LePage<br>Self-Portrait<span class="mono">1824 · Cleveland Museum of Art</span></figcaption></figure>
-    </div>
   </div>
 </header>
 
@@ -330,18 +330,6 @@ footer .credits{max-width:46rem;text-align:center;line-height:1.6}
   </div>
 </section>
 
-<section class="section" id="watch">
-  <div class="wrap">
-    <div class="eyebrow reveal">Watch them paint</div>
-    <h2 class="reveal">Four agents, one masterpiece, every <em>stroke</em> replayed.</h2>
-    <p class="lead reveal">Four frontier models rebuilt <i>Bamboo in Snow</i> (Dapeng Zhengkun, 1774) as Canvas programs. We replay each submitted program's own drawing calls in order, so you can watch how each one composes the painting.</p>
-    <figure class="video-wrap reveal">
-      <video id="four-models" src="assets/four_models.mp4" poster="assets/four_models_poster.jpg" controls muted playsinline preload="metadata"></video>
-      <figcaption>Single pass@1 rollouts on one painting (met-49068) through the Codex harness. Frames are paced by visual progress, not wall-clock time.</figcaption>
-    </figure>
-  </div>
-</section>
-
 <section class="section" id="results">
   <div class="wrap">
     <div class="eyebrow reveal">Results</div>
@@ -394,6 +382,15 @@ footer .credits{max-width:46rem;text-align:center;line-height:1.6}
       <div class="stat"><div class="n">17,323</div><div class="k">Rubric criteria</div></div>
       <div class="stat"><div class="n">18</div><div class="k">Leaf categories</div></div>
       <div class="stat"><div class="n">4</div><div class="k">Museum collections</div></div>
+    </div>
+
+    <div class="gallery reveal" style="margin-top:2.5rem" aria-label="Sample masterpieces from the benchmark">
+      <figure tabindex="0"><img src="assets/aic-20684.jpg" alt="Gustave Caillebotte, Paris Street; Rainy Day, 1877" loading="lazy"><figcaption>Caillebotte<br>Paris Street; Rainy Day<span class="mono">1877 · Art Institute of Chicago</span></figcaption></figure>
+      <figure tabindex="0"><img src="assets/aic-95998.jpg" alt="Rembrandt van Rijn, Old Man with a Gold Chain, 1631" loading="lazy"><figcaption>Rembrandt<br>Old Man with a Gold Chain<span class="mono">1631 · Art Institute of Chicago</span></figcaption></figure>
+      <figure tabindex="0"><img src="assets/met-436947.jpg" alt="Edouard Manet, Boating, 1874" loading="lazy"><figcaption>Manet<br>Boating<span class="mono">1874 · The Met</span></figcaption></figure>
+      <figure tabindex="0"><img src="assets/met-49068.jpg" alt="Dapeng Zhengkun, Bamboo in Snow, 1774" loading="lazy"><figcaption>Dapeng Zhengkun<br>Bamboo in Snow<span class="mono">1774 · The Met</span></figcaption></figure>
+      <figure tabindex="0"><img src="assets/cma-1931-440.jpg" alt="Ralph A. Blakelock, Yellow Light, before 1905" loading="lazy"><figcaption>Blakelock<br>Yellow Light<span class="mono">before 1905 · Cleveland Museum of Art</span></figcaption></figure>
+      <figure tabindex="0"><img src="assets/cma-163350.jpg" alt="François LePage, Self-Portrait, 1824" loading="lazy"><figcaption>LePage<br>Self-Portrait<span class="mono">1824 · Cleveland Museum of Art</span></figcaption></figure>
     </div>
     <div class="dists">
       <div class="dist reveal"><h4>Visual genre</h4><div id="d-genre"></div></div>
@@ -489,8 +486,9 @@ for(const [id,items] of Object.entries(dists)){
 const vid=document.getElementById('four-models');
 if(vid&&'IntersectionObserver' in window){
   const vio=new IntersectionObserver(es=>es.forEach(e=>{
-    if(e.isIntersecting&&vid.paused&&!vid.dataset.started){vid.dataset.started='1';vid.play().catch(()=>{})}
-  }),{threshold:.5});
+    // retry until it has actually started; never fight a viewer who paused mid-way
+    if(e.isIntersecting&&vid.paused&&vid.currentTime===0){vid.play().catch(()=>{})}
+  }),{threshold:.25});
   vio.observe(vid);
 }
 
